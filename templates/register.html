@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - EduPredict.AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .auth-container {
+            max-width: 450px;
+            margin: 5rem auto;
+            text-align: center;
+        }
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+        .auth-card .input-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        .auth-card button {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob shape-1"></div>
+        <div class="blob shape-2"></div>
+        <div class="blob shape-3"></div>
+    </div>
+
+    <div class="container auth-container">
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h1 style="font-size: 2rem; margin-bottom: 2rem;">EduPredict<span>.AI</span></h1>
+
+        <div class="auth-card">
+            <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-user-plus"></i> Create Account</h2>
+            <form id="register-form">
+                <div class="input-group">
+                    <label for="username">Full Name</label>
+                    <input type="text" id="username" name="username" placeholder="Jane Doe" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="jane@school.edu" required>
+                </div>
+                <div class="input-group">
+                    <label for="role">Account Type</label>
+                    <select id="role" name="role" required>
+                        <option value="student">Student Sandbox Access</option>
+                        <option value="teacher">Teacher (Live Dashboard) Access</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="password">Create Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+                </div>
+                <button type="submit" class="submit-btn" id="reg-btn">
+                    <span>Register</span>
+                    <i class="fa-solid fa-user-check"></i>
+                    <div class="loader hidden"></div>
+                </button>
+                <div id="auth-error" class="error-msg hidden"></div>
+            </form>
+            <p style="margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary);">
+                Already have an account? <a href="/login" style="color: var(--primary-light);">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('reg-btn');
+            const errorDiv = document.getElementById('auth-error');
+            
+            btn.classList.add('loading');
+            errorDiv.classList.add('hidden');
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if(result.success) {
+                    window.location.href = result.redirect;
+                } else {
+                    errorDiv.textContent = result.error;
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorDiv.textContent = "Network Error.";
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.classList.remove('loading');
+            }
+        });
+    </script>
+</body>
+</html>

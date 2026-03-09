@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Prediction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob shape-1"></div>
+        <div class="blob shape-2"></div>
+        <div class="blob shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header" style="position: relative;">
+            <div class="logo">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1>EduPredict<span>.AI</span></h1>
+            <p>Predict student performance and get actionable recommendations powered by machine learning.</p>
+            
+            {% if current_user.is_authenticated %}
+            <div style="position: absolute; top: 0; right: 0; text-align: right;">
+                <span style="color: var(--text-secondary); margin-right: 1rem;">
+                    <i class="fa-solid fa-user"></i> {{ current_user.username }}
+                </span>
+                {% if current_user.role == 'teacher' %}
+                    <a href="{{ url_for('dashboard') }}" style="color: var(--primary-light); text-decoration: none; margin-right: 1rem; border: 1px solid var(--primary-light); padding: 0.3rem 0.8rem; border-radius: 8px;">Live Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('study_assistant') }}" style="color: var(--primary-light); text-decoration: none; margin-right: 1rem; border: 1px solid var(--primary-light); padding: 0.3rem 0.8rem; border-radius: 8px;"><i class="fa-solid fa-book"></i> Study Assistant</a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" style="color: var(--danger); text-decoration: none;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+            </div>
+            {% endif %}
+        </header>
+
+        <main class="main-content layout-split">
+            <div class="glass-card form-section">
+                <h2><i class="fa-solid fa-clipboard-user"></i> Student Profile</h2>
+                <form id="prediction-form">
+                    <div class="form-grid">
+                        <!-- Demographics -->
+                        <div class="input-group">
+                            <label for="age">Age <span class="val-display" id="val-age">18</span></label>
+                            <input type="range" id="age" name="age" min="10" max="30" value="18" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="parent_education">Parent's Education</label>
+                            <select id="parent_education" name="parent_education" required>
+                                <option value="high_school">High School</option>
+                                <option value="bachelor">Bachelor's Degree</option>
+                                <option value="master">Master's Degree</option>
+                                <option value="phd">Ph.D.</option>
+                            </select>
+                        </div>
+
+                        <!-- Academics -->
+                        <div class="input-group">
+                            <label for="previous_grade">Previous Grade <span class="val-display" id="val-previous_grade">75</span>%</label>
+                            <input type="range" id="previous_grade" name="previous_grade" min="0" max="100" step="1" value="75" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="study_hours">Weekly Study Hours <span class="val-display" id="val-study_hours">10</span>h</label>
+                            <input type="range" id="study_hours" name="study_hours" min="0" max="100" step="0.5" value="10" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="attendance">Attendance Rate <span class="val-display" id="val-attendance">90</span>%</label>
+                            <input type="range" id="attendance" name="attendance" min="0" max="100" step="1" value="90" required>
+                        </div>
+
+                        <!-- Lifestyle & Support -->
+                        <div class="input-group">
+                            <label for="sleep_hours">Daily Sleep <span class="val-display" id="val-sleep_hours">7.5</span>h</label>
+                            <input type="range" id="sleep_hours" name="sleep_hours" min="0" max="24" step="0.5" value="7.5" required>
+                        </div>
+                        <div class="input-group toggle-group">
+                            <label for="internet_access">Internet Access</label>
+                            <label class="switch">
+                                <input type="checkbox" id="internet_access" name="internet_access" value="1" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                         <div class="input-group toggle-group">
+                            <label for="tutoring">Extratutoring</label>
+                            <label class="switch">
+                                <input type="checkbox" id="tutoring" name="tutoring" value="1">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="input-group toggle-group">
+                            <label for="family_support">Family Support</label>
+                            <label class="switch">
+                                <input type="checkbox" id="family_support" name="family_support" value="1" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="input-group toggle-group">
+                            <label for="extra_curricular">Extra-curriculars</label>
+                            <label class="switch">
+                                <input type="checkbox" id="extra_curricular" name="extra_curricular" value="1" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section (Now side-by-side) -->
+            <div class="glass-card result-section" id="result-section">
+                 <h2><i class="fa-solid fa-chart-line"></i> Prediction Report</h2>
+                 
+                 <div class="score-display">
+                     <div class="circular-progress" id="progress-circle">
+                         <div class="value-container">
+                             <span id="predicted-grade-val">0</span><span>%</span>
+                         </div>
+                     </div>
+                     <div class="score-details">
+                         <span class="label">Predicted Final Grade</span>
+                         <span class="category-badge" id="category-badge">Evaluating...</span>
+                     </div>
+                 </div>
+
+                 <!-- Explainable AI Section -->
+                 <div class="xai-section" style="margin-bottom: 2rem;">
+                     <h3 style="color: var(--primary-light); margin-bottom: 1rem; font-size: 1.1rem;">
+                         <i class="fa-solid fa-microchip"></i> Prediction Impact Factors
+                     </h3>
+                     <div id="xai-bars" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                         <p style="color: var(--text-secondary); font-size: 0.9rem;">Waiting for prediction data...</p>
+                     </div>
+                 </div>
+
+                 <!-- Radar Chart Section -->
+                 <div class="radar-section" style="margin-bottom: 2rem;">
+                     <h3 style="color: var(--primary-light); margin-bottom: 1rem; font-size: 1.1rem;">
+                         <i class="fa-solid fa-chart-pie"></i> Profile Analytics
+                     </h3>
+                     <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1rem; position: relative; height: 300px; width: 100%;">
+                         <canvas id="profileRadarChart"></canvas>
+                     </div>
+                 </div>
+
+                 <div class="recommendations">
+                     <h3><i class="fa-solid fa-lightbulb"></i> AI Recommendations</h3>
+                     <ul id="recommendations-list">
+                         <li style="color: var(--text-secondary);"><i class="fa-solid fa-circle-notch fa-spin"></i> Adjust sliders to see real-time AI recommendations.</li>
+                     </ul>
+                 </div>
+                 
+                 <button class="reset-btn" id="print-btn" style="margin-top: 2rem; border-color: var(--primary-light); color: var(--primary-light); width: 100%; margin-bottom: 0.5rem;">
+                     <i class="fa-solid fa-file-pdf"></i> Export Prediction Report
+                 </button>
+
+                 {% if current_user.is_authenticated and current_user.role == 'student' %}
+                 <button class="submit-btn" id="save-prediction-btn" style="width: 100%;">
+                     <span>Save to Profiler History</span>
+                     <i class="fa-solid fa-bookmark"></i>
+                     <div class="loader hidden" id="save-loader"></div>
+                 </button>
+                 <div id="save-status" style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; display: none;"></div>
+                 {% endif %}
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 EduPredict.AI - Advanced Machine Learning Systems</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/offline-ai.js') }}"></script>
+    
+    <!-- Register Service Worker for PWA Offline Capabilities -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker registered', reg))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        });
+      }
+    </script>
+</body>
+</html>
